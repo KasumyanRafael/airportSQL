@@ -2,7 +2,7 @@
 <html lang="ru">
    <head>
       <meta charset="UTF-8">
-      <title>Проект &laquo;Учёт посещаемости&raquo;</title>
+      <title>Проект &laquo;ИС аэропорт&raquo;</title>
 	  <script src="jquery-3.7.1.min.js"></script>
    </head>
    <body>
