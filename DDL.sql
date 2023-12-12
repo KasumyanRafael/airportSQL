@@ -140,5 +140,7 @@ create table `timeTable`(
     `RegistrationStands_Number` tinyint unsigned default"0",
     `LandingStart` time default "00:00",
     `LandingEnd` time default "00:00",
-    `Status` tinyint unsigned default "0"
+    `Status` tinyint unsigned default "0",
+    FOREIGN KEY (`Route_Number`) references `route` (`Number`) on delete cascade,
+    FOREIGN KEY (`Route_Airline_IATA-code`) references `route` (`airline_IATA-code`) on delete cascade
 );

@@ -13,286 +13,230 @@ function create_database(){
 	
 	// Пересоздание БАЗЫ ДАННЫХ (удаление, а затем создание)
 	try{
-		$dbc->exec('drop database if exists univer');
-		$dbc->exec('create database univer');
-		$dbc->exec('use univer');
+		$dbc->exec('drop database if exists airport');
+		$dbc->exec('create database airport');
+		$dbc->exec('use airport');
 	}catch(PDOException $err){
 		echo $err->getMessage();
 	}
 
-	// ======== Создание таблицы user - пользователи системы
+	// ======== Создание таблицы users - пользователи системы
 	try{
-		$query_str = 'create table if not exists user (id int unsigned primary key auto_increment
-						, name char(150) default ""
-						, stud_id int unsigned
-						, prep_id int unsigned
-						, pass char(250) default ""
-						, type_user enum("1","2","3","4") default "1"
-						, unique key(name), key(type_user))';
+		$query_str = 'create table if not exists users (id int unsigned primary key auto_increment
+		                , passwordSeria char(4) primary key NOT NULL
+						, passwordNumber char(4) primary key NOT NULL
+						, name varchar(16) NOT NULL
+						, surname varchar(16) NOT NULL
+						, birthdayDate date NOT NULL
+						, password char(20) default"passwordNumber"
+						, gender tinyint NOT NULL
+						, userType enum ("1","2","3","4","5","6") default "1"
+						, userAddAccess` enum ("0","1") default"0")';
 		$dbc->exec($query_str);
-		echo 'Таблица user создана!<br>';
+		echo 'Таблица users создана!<br>';
 	}catch(PDOException $err){
-		echo "user ".$err->getMessage();
+		echo "users".$err->getMessage();
 	}
-	// ======== Создание таблицы type_struc - типы структурных подразделений
+	// ======== Создание таблицы userContacts - контакты пользователей
 	try{
-		$query_str = 'create table if not exists type_struc (id smallint unsigned primary key auto_increment
-						, name char(100) default ""
-						, unique key(name)
-						)';
+		$query_str = 'create table if not exists userContacts (users_passwordSeria char(4) NOT NULL,
+		, users_passwordNumber char(6) NOT NULL
+		, email varchar(20) NOT NULL
+		, phoneNumber varchar(16) NOT NULL
+		, FOREIGN KEY (`users_passwordSeria`) references `users` (`passwordSeria`) on delete cascade,
+		, FOREIGN KEY (`users_passwordNumber`) references `users` (`passwordNumber`) on delete cascade))';
 		$dbc->exec($query_str);
 
-		echo 'Таблица типов подразделений создана!<br>';
+		echo 'Таблица userContacts создана!<br>';
 	}catch(PDOException $err){
-		echo "type_struc ".$err->getMessage();
+		echo "userContacts ".$err->getMessage();
 	}
 	
-	// ======== Создание таблицы structure - структурные подразделения
+	// ======== Создание таблицы services - услуги аэропорта
 	try{
-		$query_str = 'create table if not exists structure (id mediumint unsigned primary key auto_increment
-						, name char(250) default ""
-						, type_id smallint unsigned 
-						, parent_id mediumint unsigned
-						, key(name), key(type_id), key(parent_id)
-						, foreign key (type_id) references type_struc(id)
-						)';
+		$query_str = 'create table if not exists services (idServices int unsigned primary key AUTO_INCREMENT
+		, serviceName varchar(20) NOT NULL
+		, price_One int unsigned NOT NULL
+		, measureUnit varchar(1) NOT NULL
+		, UNIQUE KEY(`serviceName`))';
 		$dbc->exec($query_str);
 
 		
-		echo 'Таблица структурных подразделений создана!<br>';
+		echo 'Таблица платных услуг создана!<br>';
 	}catch(PDOException $err){
-		echo "structure ".$err->getMessage();
+		echo "services ".$err->getMessage();
 	}
 	
-	// ======== Создание таблицы disc - дисциплины  
+	// ======== Создание таблицы airline - авиакомпании, осуществляющие рейсы в аэропорт Беслан
 	try{
-		$query_str = 'create table if not exists disc (id int unsigned primary key auto_increment
-						, name char(250) default ""
-						, module_plan char(100) default ""
-						, index_plan char(20) default ""
-						, kaf_id mediumint unsigned comment "внешний ключ для связи с таблицей structure"
-						, plan_id int unsigned comment "Ссылка на учебный план"
-						, key(name), key(module_plan), key(index_plan)
-						, foreign key (kaf_id) references structure(id)
-						)';
+		$query_str = 'create table if not exists airline (IATA-code char(2) primary key not null
+		, airlineName varchar(10) not null
+		, unique key(`airlineName`))';
 		$dbc->exec($query_str);
-
-		echo 'Таблица дисциплин создана!<br>';
+		echo 'Таблица airline создана!<br>';
 	}catch(PDOException $err){
-		echo "disc ".$err->getMessage();
+		echo "airline".$err->getMessage();
 	}
 	
-	// ======== Создание таблицы spec - специальности и направления подготовки
+	// ======== Создание таблицы aircrafts- модели воздушных судов, которые в силу своих характеристик может принять аэропорт
 	try{
-		$query_str = 'create table if not exists spec (id smallint unsigned primary key auto_increment
-						, name char(150) default ""
-						, shifr char(25) default "", key(shifr), key(name))';
-		$dbc->exec($query_str);
-		echo 'Таблица spec создана!<br>';
-	}catch(PDOException $err){
-		echo "spec ".$err->getMessage();
-	}
-	
-	// ======== Создание таблицы grup - академические группы
-	try{
-		$query_str = 'create table if not exists grup (id int unsigned primary key auto_increment
-						, name char(150) default ""
-						, year_start char(4) default "" 
-						, spec_id smallint unsigned, key(name), key(spec_id), key(year_start)
-						, foreign key (spec_id) references spec(id)
-						)';
+		$query_str = 'create table if not exists aircrafts (idAircrafts int unsigned primary key AUTO_INCREMENT
+		, modelName varchar(10) not null
+		, averageRange int unsigned not null
+		, unique key(`modelName`))';
 		$dbc->exec($query_str);
 
-		echo 'Таблица групп создана!<br>';
+		echo 'Таблица aircrafts создана!<br>';
 	}catch(PDOException $err){
-		echo "grup ".$err->getMessage();
+		echo "aircrafts".$err->getMessage();
 	}
 
-	// ======== Создание таблицы stud - студенты
+	// ======== Создание таблицы fleet - флот авиакомпаний
 	try{
-		$query_str = 'create table stud (id int unsigned primary key auto_increment
-						, fam char(70) default ""
-						, name char(50) default ""
-						, otch char(50) default ""
-						, dt_r date
-						, grup_id int unsigned
-						, status enum("0","1") default "0"
-						, unique key(fam, name, otch, dt_r)
-						, key(fam, name, otch)
-						, key(grup_id), key(status), key(dt_r)
-						, foreign key (grup_id) references grup(id)
+		$query_str = 'create table fleet (countryReg char(2) primary key not null
+						, numberReg varchar(6) primary key not null
+						, airline_IATA-code char(2) not null
+						, aircrafts_idAircrafts int unsigned not null
+						, businessSeats smallint unsigned default"0"
+						, economySeats smallint unsigned default"0"
+						, cargoSlots smallint unsigned default"0"
+						, madeOn date not null
+						, FOREIGN KEY (`airline_IATA-code`) references `airline` (`IATA-code`) on delete cascade
+						, FOREIGN KEY (`aircrafts_idAircrafts`) references `aircrafts` (`idAircrafts`) on delete cascade
 						)';
 		$dbc->exec($query_str);
-		echo 'Таблица студентов создана!<br>';
+		echo 'Таблица судов создана!<br>';
 	}catch(PDOException $err){
-		echo "stud " . $err->getMessage();
+		echo "fleet " . $err->getMessage();
 	}
+
 
 		
-	// ======== Создание таблицы dolz - перечень должностей
+	// ======== Создание таблицы ordersToService - заказы
 	try{
-		$query_str = 'create table if not exists dolz (id smallint unsigned primary key auto_increment
-						, name char(100) default ""
-						, key(name))';
+		$query_str = 'create table if not exists ordersToService (orderId int unsigned primary key AUTO_INCREMENT
+						, services_idServices tinyint unsigned not null
+						, amount tinyint unsigned default "1",
+						, users_passwordSeria char(4) not null
+						, `users_passwordNumber` char(6) not null
+						, FOREIGN KEY (`users_passwordSeria`) references `users` (`passwordSeria`) on delete cascade
+						, FOREIGN KEY (`users_passwordNumber`) references `users` (`passwordNumber`) on delete cascade
+						, FOREIGN KEY (`services_idServices`) references `services` (`idServices`) on delete cascade
+						)';
 		$dbc->exec($query_str);
-		echo 'Таблица dolz создана!<br>';
+		echo 'Таблица заказов создана!<br>';
 	}catch(PDOException $err){
-		echo "dolz ".$err->getMessage();
+		echo "ordersToService ".$err->getMessage();
 	}	
 
 	
-	// ======== Создание таблицы stepen - перечень учёных степеней
+	// ======== Создание таблицы destinations - cписок всех аэропортов, куда можно улететь
 	try{
-		$query_str = 'create table if not exists stepen (id smallint unsigned primary key auto_increment
-						, name char(100) default ""
-						, nm char(10) default ""
-						, unique key(name), key(nm))';
+		$query_str = 'create table if not exists destinations (`IATA-dest` char(3) primary key not null
+						, cityName varchar(18) default "Владикавказ(Беслан)"
+						, country varchar(30) default "Россия"
+						, unique key(`cityName`)
+						)';
 		$dbc->exec($query_str);
-		echo 'Таблица stepen создана!<br>';
+		echo 'Таблица destinations создана!<br>';
 	}catch(PDOException $err){
-		echo "stepen ".$err->getMessage();
+		echo "destinations ".$err->getMessage();
 	}	
 
-// ======== Создание таблицы prep - преподаватели
+// ======== Создание таблицы route - маршруты
 	try{
-		$query_str = 'create table if not exists prep (id int unsigned primary key auto_increment
-						, fam char(70) default ""
-						, name char(50) default ""
-						, otch char(50) default ""
-						, dt_r date
-						, structure_id mediumint unsigned
-						, dolz_id smallint unsigned
-						, stepen_id smallint unsigned
-						, unique key(fam, name, otch, dt_r)
-						, key(fam, name, otch)
-						, key(dolz_id), key(stepen_id), key(dt_r), key(structure_id)
-						, foreign key (structure_id) references structure(id)
-						, foreign key (dolz_id) references dolz(id)
-						, foreign key (stepen_id) references stepen(id)
+		$query_str = 'create table if not exists route (airline_IATA-code char(2) primary key not null
+						, number int unsigned primary key not null
+						, destinations_IATA-dest char(3) not null
+						, RouteType tinyint unsigned default "1"
+						, ArrTime time not null
+						, DepTime time not null
+						, FlightDays varchar(7) default"1234567"
+						, Fleet_CountryReg char(2) not null
+						, Fleet_NumberReg varchar(6) not null
+						, FirstFlight date not null
+						, LastFlight date not null
+						, AverageRouteDistance int unsigned not null
+						, AverageDuration time not null
+						, EconomyPrice smallint unsigned default "0"
+						, BusinessPrice` smallint unsigned default "0"
+						, CargoPrice smallint unsigned default "0"
+						, FOREIGN KEY (`airline_IATA-code`) references `airline` (`IATA-code`) on delete cascade
+						, FOREIGN KEY (`destinations_IATA-dest`) references `destination` (`IATA-dest`) on delete cascade
+						, FOREIGN KEY (`Fleet_CountryReg`) references `fleet` (`countryReg`) on delete cascade
+						, FOREIGN KEY (`Fleet_NumberReg`) references `fleet` (`numberReg`) on delete cascade
+						, unique key(`RouteType`)
 						)';
 		$dbc->exec($query_str);
 
-		echo 'Таблица prep создана!<br>';
+		echo 'Таблица route создана!<br>';
 	}catch(PDOException $err){
-		echo "prep ".$err->getMessage();
+		echo "route ".$err->getMessage();
+	}
+
+	// ======== Создание таблицы tickets - билеты пассажиров
+	try{
+		$query_str = 'create table if not exists tickets (ticketId int unsigned primary key AUTO_INCREMENT
+						, serviceClass tinyint unsigned default "0"
+						, route_Number smallint unsigned not null
+						, Route_Airline_IATA-code char(2) not null
+						, OrdersToService_OrderId smallint unsigned default "0"
+						, TotalPrice smallint unsigned default "0"
+						, SeatNumber char(2) default "A0"
+						, GateNumber tinyint default "0"
+						, Users_PasswordSeria char(4) default"1234"
+						, Users_PasswordNumber char(6) default"123456",
+						, FOREIGN KEY (`route_Number`) references `route` (`Number`) on delete cascade
+						, FOREIGN KEY (`route_airline_IATA-code`) references `route` (`airline_IATA-code`) on delete cascade
+						, FOREIGN KEY (`Fleet_CountryReg`) references `fleet` (`countryReg`) on delete cascade
+						, FOREIGN KEY (`Fleet_NumberReg`) references `fleet` (`numberReg`) on delete cascade
+						, FOREIGN KEY (`Users_PasswordSeria`) references `users` (`passwordSeria`) on delete cascade
+						, FOREIGN KEY (`Users_PasswordNumber`) references `users` (`passwordNumber`) on delete cascade
+						)';
+		$dbc->exec($query_str);
+
+		echo 'Таблица tickets создана!<br>';
+	}catch(PDOException $err){
+		echo "tickets ".$err->getMessage();
+	}
+	// ======== Создание таблицы registrationStands - стоек регистрации
+	try{
+		$query_str = 'create table if not exists registrationStands (number tinyint unsigned primary key default "0"
+		, airlineName varchar(10) not null
+		, routeType tinyint default "0")';
+		$dbc->exec($query_str);
+		echo 'Таблица registrationStands создана!<br>';
+	}catch(PDOException $err){
+		echo "registrationStands".$err->getMessage();
+	}
+	
+
+
+	// ======== Создание таблицы timaTable - расписания рейсов
+	try{
+		$query_str = 'create table if not exists timeTable (Route_Number smallint unsigned not null
+						, Route_Airline_IATA-code char(3) not null
+						, RegistrationStart time default "00:00"
+						, RegistrationEnd time default "00:00"
+						, RegistrationStands_Number tinyint unsigned default"0"
+						, LandingStart time default "00:00"
+						, LandingEnd time default "00:00"
+						, Status tinyint unsigned default "0"
+						, Users_PasswordSeria char(4) default"1234"
+						, Users_PasswordNumber char(6) default"123456",
+						, FOREIGN KEY (`Route_Number`) references `route` (`Number`) on delete cascade,
+						, FOREIGN KEY (`Route_Airline_IATA-code`) references `route` (`airline_IATA-code`) on delete cascade
+						)';
+		$dbc->exec($query_str);
+
+		echo 'Таблица timeTable создана!<br>';
+	}catch(PDOException $err){
+		echo "timeTable ".$err->getMessage();
 	}
 }
 
-function journ_tables(){
-	/*
-		Создание системы журналирования операций с базой данных
-	*/
-	global $dbc;
-	$dbc->exec('use univer');
-	
-	// ======== Создание основной журнальной таблицы journal - журнал операций
-	try{
-		$query_str = 'create table journal (id bigint unsigned auto_increment primary key
-						, tbl_name char(70) default ""
-						, oper char(50) default ""
-						, dt timestamp default CURRENT_TIMESTAMP
-						, user char(150) default ""
-						, key(tbl_name)
-						, key(oper)
-						, key(dt)
-						, key(user)
-						)';
-		$dbc->exec($query_str);
-		echo 'Журнальная таблица создана!<br>';
-	}catch(PDOException $err){
-		echo "journal " . $err->getMessage();
-	}	
-	
-	// ======== Создание журнальной таблицы stud_journ - студенты
-	try{
-		$query_str = 'create table stud_journ (id int unsigned
-						, fam char(70) default ""
-						, name char(50) default ""
-						, otch char(50) default ""
-						, dt_r date
-						, grup_id int unsigned
-						, status enum("0","1") default "0"
-						, journal_id bigint unsigned
-						, key(fam, name, otch, dt_r)
-						, key(fam, name, otch)
-						, key(grup_id), key(status), key(dt_r)
-						)';
-		$dbc->exec($query_str);
-		echo 'Журнальная таблица студентов создана!<br>';
-	}catch(PDOException $err){
-		echo "stud_journ " . $err->getMessage();
-	}
-	
-	// ======== Создание триггера добавления в таблицу stud - студенты
-	try{
-		$query_str = 'create trigger ins_stud after insert on stud
-						for each row
-							begin
-								insert into journal set tbl_name="stud", oper="insert", 
-										user = user();
-								select last_insert_id() into @last;
-								insert into stud_journ set id = NEW.id
-									, fam = NEW.fam
-									, name = NEW.name
-									, otch = NEW.otch
-									, dt_r = NEW.dt_r
-									, grup_id = NEW.grup_id
-									, status = NEW.status
-									, journal_id = @last;
-							end;
-						';
-		$dbc->exec($query_str);
-		echo 'Триггер добавления для таблицы студентов создан!<br>';
-	}catch(PDOException $err){
-		echo "ins_stud " . $err->getMessage();
-	}
-	// ======== Создание триггера удаления из таблицы stud - студенты
-	try{
-		$query_str = 'create trigger del_stud after delete on stud
-						for each row
-							begin
-								insert into journal set tbl_name="stud", oper="delete", 
-										user = user();
-								select last_insert_id() into @last;
-								insert into stud_journ set id = OLD.id
-									, fam = OLD.fam
-									, name = OLD.name
-									, otch = OLD.otch
-									, dt_r = OLD.dt_r
-									, grup_id = OLD.grup_id
-									, status = OLD.status
-									, journal_id = @last;
-							end;
-						';
-		$dbc->exec($query_str);
-		echo 'Триггер удаления для таблицы студентов создан!<br>';
-	}catch(PDOException $err){
-		echo "del_stud " . $err->getMessage();
-	}	
-	// ======== Создание триггера изменения таблицы stud - студенты
-	try{
-		$query_str = 'create trigger update_stud after update on stud
-						for each row
-							begin
-								insert into journal set tbl_name="stud", oper="update", 
-										user = user();
-								select last_insert_id() into @last;
-								insert into stud_journ set id = NEW.id
-									, fam = NEW.fam
-									, name = NEW.name
-									, otch = NEW.otch
-									, dt_r = NEW.dt_r
-									, grup_id = NEW.grup_id
-									, status = NEW.status
-									, journal_id = @last;
-							end;
-						';
-		$dbc->exec($query_str);
-		echo 'Триггер изменения для таблицы студентов создан!<br>';
-	}catch(PDOException $err){
-		echo "update_stud " . $err->getMessage();
-	}	
-}
+
+
 
 
 function insert_test_data(){
