@@ -23,15 +23,15 @@ function create_database(){
 	// ======== Создание таблицы users - пользователи системы
 	try{
 		$query_str = 'create table if not exists users (id int unsigned primary key auto_increment
-		                , passwordSeria char(4) primary key NOT NULL
-						, passwordNumber char(4) primary key NOT NULL
+		                , passwordSeria char(5) NOT NULL
+						, passwordNumber char(8) NOT NULL
 						, name varchar(16) NOT NULL
 						, surname varchar(16) NOT NULL
 						, birthdayDate date NOT NULL
-						, password char(20) default"passwordNumber"
+						, password char(20) default"1234"
 						, gender tinyint NOT NULL
 						, userType enum ("1","2","3","4","5","6") default "1"
-						, userAddAccess` enum ("0","1") default"0")';
+						, userAddAccess enum ("0","1") default"0")';
 		$dbc->exec($query_str);
 		echo 'Таблица users создана!<br>';
 	}catch(PDOException $err){
@@ -39,12 +39,11 @@ function create_database(){
 	}
 	// ======== Создание таблицы userContacts - контакты пользователей
 	try{
-		$query_str = 'create table if not exists userContacts (users_passwordSeria char(4) NOT NULL,
-		, users_passwordNumber char(6) NOT NULL
+		$query_str = 'create table if not exists userContacts (
+		 users_id int unsigned NOT NULL
 		, email varchar(20) NOT NULL
 		, phoneNumber varchar(16) NOT NULL
-		, FOREIGN KEY (`users_passwordSeria`) references `users` (`passwordSeria`) on delete cascade,
-		, FOREIGN KEY (`users_passwordNumber`) references `users` (`passwordNumber`) on delete cascade))';
+		, FOREIGN KEY (`users_id`) references `users` (`id`) on delete cascade)';
 		$dbc->exec($query_str);
 
 		echo 'Таблица userContacts создана!<br>';
@@ -55,7 +54,7 @@ function create_database(){
 	// ======== Создание таблицы services - услуги аэропорта
 	try{
 		$query_str = 'create table if not exists services (idServices int unsigned primary key AUTO_INCREMENT
-		, serviceName varchar(20) NOT NULL
+		, serviceName varchar(20) NOT NULL unique
 		, price_One int unsigned NOT NULL
 		, measureUnit varchar(1) NOT NULL
 		, UNIQUE KEY(`serviceName`))';
@@ -69,9 +68,8 @@ function create_database(){
 	
 	// ======== Создание таблицы airline - авиакомпании, осуществляющие рейсы в аэропорт Беслан
 	try{
-		$query_str = 'create table if not exists airline (IATA-code char(2) primary key not null
-		, airlineName varchar(10) not null
-		, unique key(`airlineName`))';
+		$query_str = 'create table if not exists airline (IATAcode char(2) primary key not null
+		, airlineName varchar(30) not null unique)';
 		$dbc->exec($query_str);
 		echo 'Таблица airline создана!<br>';
 	}catch(PDOException $err){
@@ -93,15 +91,16 @@ function create_database(){
 
 	// ======== Создание таблицы fleet - флот авиакомпаний
 	try{
-		$query_str = 'create table fleet (countryReg char(2) primary key not null
-						, numberReg varchar(6) primary key not null
-						, airline_IATA-code char(2) not null
+		$query_str = 'create table fleet (id int unsigned primary key not null,
+			              countryReg char(2)  not null
+						, numberReg varchar(6)  not null
+						, airline_IATAcode char(2) not null
 						, aircrafts_idAircrafts int unsigned not null
 						, businessSeats smallint unsigned default"0"
 						, economySeats smallint unsigned default"0"
 						, cargoSlots smallint unsigned default"0"
 						, madeOn date not null
-						, FOREIGN KEY (`airline_IATA-code`) references `airline` (`IATA-code`) on delete cascade
+						, FOREIGN KEY (`airline_IATAcode`) references `airline` (`IATAcode`) on delete cascade
 						, FOREIGN KEY (`aircrafts_idAircrafts`) references `aircrafts` (`idAircrafts`) on delete cascade
 						)';
 		$dbc->exec($query_str);
@@ -115,12 +114,10 @@ function create_database(){
 	// ======== Создание таблицы ordersToService - заказы
 	try{
 		$query_str = 'create table if not exists ordersToService (orderId int unsigned primary key AUTO_INCREMENT
-						, services_idServices tinyint unsigned not null
-						, amount tinyint unsigned default "1",
-						, users_passwordSeria char(4) not null
-						, `users_passwordNumber` char(6) not null
-						, FOREIGN KEY (`users_passwordSeria`) references `users` (`passwordSeria`) on delete cascade
-						, FOREIGN KEY (`users_passwordNumber`) references `users` (`passwordNumber`) on delete cascade
+						, services_idServices int unsigned not null
+						, amount tinyint unsigned default "1"
+						, users_id int unsigned not null
+						, FOREIGN KEY (`users_id`) references `users` (`id`) on delete cascade
 						, FOREIGN KEY (`services_idServices`) references `services` (`idServices`) on delete cascade
 						)';
 		$dbc->exec($query_str);
@@ -132,8 +129,8 @@ function create_database(){
 	
 	// ======== Создание таблицы destinations - cписок всех аэропортов, куда можно улететь
 	try{
-		$query_str = 'create table if not exists destinations (`IATA-dest` char(3) primary key not null
-						, cityName varchar(18) default "Владикавказ(Беслан)"
+		$query_str = 'create table if not exists destinations (`IATAdest` char(3) primary key not null
+						, cityName varchar(30) default "Владикавказ(Беслан)"
 						, country varchar(30) default "Россия"
 						, unique key(`cityName`)
 						)';
@@ -145,27 +142,25 @@ function create_database(){
 
 // ======== Создание таблицы route - маршруты
 	try{
-		$query_str = 'create table if not exists route (airline_IATA-code char(2) primary key not null
-						, number int unsigned primary key not null
-						, destinations_IATA-dest char(3) not null
+		$query_str = 'create table if not exists route (id int unsigned primary key auto_increment
+			            , airline_IATAcode char(2) not null
+						, number int unsigned not null
+						, destinations_IATAdest char(3) not null
 						, RouteType tinyint unsigned default "1"
 						, ArrTime time not null
 						, DepTime time not null
 						, FlightDays varchar(7) default"1234567"
-						, Fleet_CountryReg char(2) not null
-						, Fleet_NumberReg varchar(6) not null
+						, fleet_id int unsigned not null
 						, FirstFlight date not null
 						, LastFlight date not null
 						, AverageRouteDistance int unsigned not null
 						, AverageDuration time not null
 						, EconomyPrice smallint unsigned default "0"
-						, BusinessPrice` smallint unsigned default "0"
+						, BusinessPrice smallint unsigned default "0"
 						, CargoPrice smallint unsigned default "0"
-						, FOREIGN KEY (`airline_IATA-code`) references `airline` (`IATA-code`) on delete cascade
-						, FOREIGN KEY (`destinations_IATA-dest`) references `destination` (`IATA-dest`) on delete cascade
-						, FOREIGN KEY (`Fleet_CountryReg`) references `fleet` (`countryReg`) on delete cascade
-						, FOREIGN KEY (`Fleet_NumberReg`) references `fleet` (`numberReg`) on delete cascade
-						, unique key(`RouteType`)
+						, FOREIGN KEY (`airline_IATAcode`) references `airline` (`IATAcode`) on delete cascade
+						, FOREIGN KEY (`destinations_IATAdest`) references `destinations` (`IATAdest`) on delete cascade
+						, FOREIGN KEY (`fleet_id`) references `fleet` (`id`) on delete cascade
 						)';
 		$dbc->exec($query_str);
 
@@ -178,20 +173,16 @@ function create_database(){
 	try{
 		$query_str = 'create table if not exists tickets (ticketId int unsigned primary key AUTO_INCREMENT
 						, serviceClass tinyint unsigned default "0"
-						, route_Number smallint unsigned not null
-						, Route_Airline_IATA-code char(2) not null
-						, OrdersToService_OrderId smallint unsigned default "0"
+						, route_id int unsigned not null
+						, fleet_id int unsigned not null
+						, OrdersToService_OrderId int unsigned default "0"
 						, TotalPrice smallint unsigned default "0"
-						, SeatNumber char(2) default "A0"
+						, SeatNumber char(2) default "00"
 						, GateNumber tinyint default "0"
-						, Users_PasswordSeria char(4) default"1234"
-						, Users_PasswordNumber char(6) default"123456",
-						, FOREIGN KEY (`route_Number`) references `route` (`Number`) on delete cascade
-						, FOREIGN KEY (`route_airline_IATA-code`) references `route` (`airline_IATA-code`) on delete cascade
-						, FOREIGN KEY (`Fleet_CountryReg`) references `fleet` (`countryReg`) on delete cascade
-						, FOREIGN KEY (`Fleet_NumberReg`) references `fleet` (`numberReg`) on delete cascade
-						, FOREIGN KEY (`Users_PasswordSeria`) references `users` (`passwordSeria`) on delete cascade
-						, FOREIGN KEY (`Users_PasswordNumber`) references `users` (`passwordNumber`) on delete cascade
+						, users_id int unsigned not null
+						, FOREIGN KEY (`route_id`) references `route` (`id`) on delete cascade
+						, FOREIGN KEY (`fleet_id`) references `fleet` (`id`) on delete cascade
+						, FOREIGN KEY (`users_id`) references `users` (`id`) on delete cascade
 						)';
 		$dbc->exec($query_str);
 
@@ -214,18 +205,14 @@ function create_database(){
 
 	// ======== Создание таблицы timaTable - расписания рейсов
 	try{
-		$query_str = 'create table if not exists timeTable (Route_Number smallint unsigned not null
-						, Route_Airline_IATA-code char(3) not null
+		$query_str = 'create table if not exists timeTable (Route_id int unsigned not null
 						, RegistrationStart time default "00:00"
 						, RegistrationEnd time default "00:00"
 						, RegistrationStands_Number tinyint unsigned default"0"
 						, LandingStart time default "00:00"
 						, LandingEnd time default "00:00"
 						, Status tinyint unsigned default "0"
-						, Users_PasswordSeria char(4) default"1234"
-						, Users_PasswordNumber char(6) default"123456",
-						, FOREIGN KEY (`Route_Number`) references `route` (`Number`) on delete cascade,
-						, FOREIGN KEY (`Route_Airline_IATA-code`) references `route` (`airline_IATA-code`) on delete cascade
+						, FOREIGN KEY (`Route_id`) references `route` (`id`) on delete cascade
 						)';
 		$dbc->exec($query_str);
 
@@ -364,4 +351,6 @@ function insert_airport_test_data(){
 
     //доделать для таблиц route,tickets,registrationStands,timetable
 }
+create_database();
+insert_airport_test_data()
 ?>
