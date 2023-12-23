@@ -20,7 +20,7 @@ function create_database(){
 		echo $err->getMessage();
 	}
 
-	// ======== Создание таблицы users - пользователи системы
+	// ======== Создание таблицы users - список пассажиров
 	try{
 		$query_str = 'create table if not exists users (id int unsigned primary key auto_increment
 		                , passwordSeria char(5) NOT NULL
@@ -30,12 +30,28 @@ function create_database(){
 						, birthdayDate date NOT NULL
 						, email varchar(20) NOT NULL
 		                , phoneNumber varchar(16) NOT NULL
+						, gender tinyint NOT NULL)';
+		$dbc->exec($query_str);
+		echo 'Таблица пассажиров (users) создана!<br>';
+	}catch(PDOException $err){
+		echo "users".$err->getMessage();
+	}
+
+	// ======== Создание таблицы personnel - персонал аэропорта. Она ни с кем не связана.
+	try{
+		$query_str = 'create table if not exists personnel (id int unsigned primary key auto_increment
+		                , passwordSeria char(5) NOT NULL
+						, passwordNumber char(8) NOT NULL
+						, name varchar(16) NOT NULL
+						, surname varchar(16) NOT NULL
+						, email varchar(20) NOT NULL
+		                , phoneNumber varchar(16) NOT NULL
 						, password char(20) default"1234"
 						, gender tinyint NOT NULL
-						, userType enum ("1","2","3","4","5","6") default "1"
+						, workerType enum ("2","3","4","5","6") not null
 						, userAddAccess enum ("0","1") default"0")';
 		$dbc->exec($query_str);
-		echo 'Таблица users создана!<br>';
+		echo 'Таблица сотрудников создана!<br>';
 	}catch(PDOException $err){
 		echo "users".$err->getMessage();
 	}
