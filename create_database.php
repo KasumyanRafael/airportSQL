@@ -28,6 +28,8 @@ function create_database(){
 						, name varchar(16) NOT NULL
 						, surname varchar(16) NOT NULL
 						, birthdayDate date NOT NULL
+						, email varchar(20) NOT NULL
+		                , phoneNumber varchar(16) NOT NULL
 						, password char(20) default"1234"
 						, gender tinyint NOT NULL
 						, userType enum ("1","2","3","4","5","6") default "1"
@@ -38,7 +40,7 @@ function create_database(){
 		echo "users".$err->getMessage();
 	}
 	// ======== Создание таблицы userContacts - контакты пользователей
-	try{
+	/*try{
 		$query_str = 'create table if not exists userContacts (
 		 users_id int unsigned NOT NULL
 		, email varchar(20) NOT NULL
@@ -49,7 +51,7 @@ function create_database(){
 		echo 'Таблица userContacts создана!<br>';
 	}catch(PDOException $err){
 		echo "userContacts ".$err->getMessage();
-	}
+	}*/
 	
 	// ======== Создание таблицы services - услуги аэропорта
 	try{
@@ -352,5 +354,4 @@ function insert_airport_test_data(){
     //доделать для таблиц route,tickets,registrationStands,timetable
 }
 create_database();
-insert_airport_test_data()
 ?>
