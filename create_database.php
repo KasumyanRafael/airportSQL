@@ -38,6 +38,7 @@ function create_database(){
 	}
 
 	// ======== Создание таблицы personnel - персонал аэропорта. Она ни с кем не связана.
+	//1 - кассир(оформляет билеты и услуги), 2 - сотрудник стойки регистрации, 3 - меняет расписание, добавляет направления, корректирует список судов и авиакомпаний, 4 - составляет список услуг
 	try{
 		$query_str = 'create table if not exists personnel (id int unsigned primary key auto_increment
 		                , passwordSeria char(5) NOT NULL
