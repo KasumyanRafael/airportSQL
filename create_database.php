@@ -41,7 +41,7 @@ function create_database(){
 	//1 - кассир(оформляет билеты и услуги), 2 - сотрудник стойки регистрации, 3 - меняет расписание, добавляет направления, корректирует список судов и авиакомпаний, 4 - составляет список услуг
 	try{
 		$query_str = 'create table if not exists personnel (id int unsigned primary key auto_increment
-		                , passwordSeria char(5) NOT NULL
+		                , passwordSeria char(5) NOT NULL 
 						, passwordNumber char(8) NOT NULL
 						, name varchar(16) NOT NULL
 						, surname varchar(16) NOT NULL
